@@ -1,19 +1,6 @@
 ﻿using MySql.Data.MySqlClient;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace DatenbankDemo
 {
@@ -26,8 +13,9 @@ namespace DatenbankDemo
 
         public MainWindow()
         {
-            InitializeComponent();
-            artistList = new ObservableCollection<Artist>();
+            InitializeComponent(); // Initialisiert alle Objekte welche im XAML erstellt wurden
+            artistList = new ObservableCollection<Artist>(); // erstellt die ObservableCollection welche die Ausgabe der Datenbank lagern soll
+            dgArtists.ItemsSource = artistList; // Verbindet das DataGrid mit der ObservableCollection um änderungen an der Liste sofort sichtbar zu machen (Add, Delete, Clear)
         }
 
         private void btnLoadData_Click(object sender, RoutedEventArgs e)
@@ -37,13 +25,13 @@ namespace DatenbankDemo
              *+2. Connectionstring aufbauen
              *+3. Verbindung zum Datenbankserver anhand vom connectionstring herstellen
              *+4. SQL-Kommando vorbereiten
-             * 5. SQL-Kommando durch die connection senden
-             * 6. Schleife Zeilenweise die Daten entgegenimmt und in einer Vorbereiteten struktur speichert
-             * 7. Alles dicht machen
+             *+5. SQL-Kommando durch die connection senden
+             *+6. Schleife Zeilenweise die Daten entgegenimmt und in einer Vorbereiteten struktur speichert
+             *+7. Alles dicht machen
              */
 
             // https://www.connectionstrings.com/mysql/
-            MySqlConnectionStringBuilder connectionStringBuilder = new MySqlConnectionStringBuilder();
+            MySqlConnectionStringBuilder connectionStringBuilder = new MySqlConnectionStringBuilder(); // Der Builder kann uns den passenden Connectionstring zusammensetzen sodass Syntaxfehler minimiert werden
             connectionStringBuilder.Server = "192.168.2.2"; // IP Adresse des servers, DNS name, Localhost und . funktioniert auch
             connectionStringBuilder.UserID = "MusicDBUser"; // Benutzername innerhalb des DBMS, dieser nutzer sollte so wenig rechte wie möglich bekommen
             connectionStringBuilder.Password = "MusicDBPass"; // Passwort zu dem Benutzernamen
@@ -57,10 +45,11 @@ namespace DatenbankDemo
                 sqlConnection.Open(); // verbindung zur datenbank herstellen
                 MySqlCommand sqlCommand = sqlConnection.CreateCommand(); // Commandoobjekt passend zu dieser Verbindung erstellen
                 sqlCommand.CommandType = System.Data.CommandType.Text; // Commandoobjekt auf ein Text-SQL kommando vorbereiten, normalerweise stored procedures aus sicherheitsgründen
-                sqlCommand.CommandText = "select * from Artists;"; // SQL-Befehle dem Commandoobjekt hinzufügen. Standardmässig nur ein Befehl (Servereinstellung)
+                sqlCommand.CommandText = "select Artist_ID, name, Origin_ID from Artist;"; // SQL-Befehle dem Commandoobjekt hinzufügen. Standardmässig nur ein Befehl (Servereinstellung)
 
-                using (MySqlDataReader sqlResponse = sqlCommand.ExecuteReader())
+                using (MySqlDataReader sqlResponse = sqlCommand.ExecuteReader()) // Kommando absenden und Antwort in einem DataReader ablegen
                 {
+                    artistList.Clear(); // bestehende Werte aus der Collection entfernen
                     while (sqlResponse.Read())
                     {
                         Artist aktuellerDatensatz = new Artist();
@@ -68,12 +57,10 @@ namespace DatenbankDemo
                         aktuellerDatensatz.Name = sqlResponse.GetString(1); // liesst spalte 1 als string ...
                         aktuellerDatensatz.OriginID = sqlResponse.GetUInt16(2); // liesst spalte 2
 
-                        artistList.Add(aktuellerDatensatz);
+                        artistList.Add(aktuellerDatensatz); // Datensatz der ObservableCollection hinzufügen. Dadurch wird auch sofort das DataGrid aktualisiert
                     }
                 } 
-
             }
-
         }
     }
 }

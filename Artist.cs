@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DatenbankDemo
+﻿namespace DatenbankDemo
 {
+    /// <summary>
+    /// Klasse welche die Daten für einen Artist enthält
+    /// </summary>
     class Artist
     {
         public int ID { get; set; }
